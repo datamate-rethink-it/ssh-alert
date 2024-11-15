@@ -1,0 +1,11 @@
+services:
+  sshlog:
+    build: .
+    restart: unless-stopped
+    environment:
+      - ALLOWED_IPS=${ALLOWED_IPS:?Variable is not set or empty}
+      - ZAMMAD_URL=${ZAMMAD_URL:?Variable is not set or empty}
+      - ZAMMAD_TOKEN=${ZAMMAD_TOKEN:?Variable is not set or empty}
+      - ZAMMAD_TICKET_HOSTNAME=${ZAMMAD_TICKET_HOSTNAME:?Variable is not set or empty}
+    volumes:
+      - /var/log/auth.log:/var/log/auth.log:ro
