@@ -81,7 +81,7 @@ def create_ticket(user: str, ip: str) -> None:
     response.raise_for_status()
 
 if __name__ == '__main__':
-    logger.info('Starting sshlog')
+    logger.info('Starting ssh-alert')
 
     allowed_ips = os.environ.get('ALLOWED_IPS', '').split(',')
     logger.info('Allowed IPs: %s', allowed_ips)

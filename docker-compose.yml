@@ -1,5 +1,5 @@
 services:
-  sshlog:
+  ssh-alert:
     build: .
     restart: unless-stopped
     environment:
