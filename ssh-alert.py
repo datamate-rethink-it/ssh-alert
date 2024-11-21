@@ -57,7 +57,6 @@ def main(allowed_ips: list[str]):
         except requests.exceptions.HTTPError as error:
             logger.error('Could not create ticket: %s', error.response.json())
         except Exception as error:
-            # TODO: Test both branches
             logger.error('Could not create ticket: %s', error)
 
 def create_ticket(user: str, ip: str) -> None:
