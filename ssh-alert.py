@@ -63,11 +63,11 @@ def main(allowed_ips: list[str]):
 def create_ticket(user: str, ip: str) -> None:
     url = f'{ZAMMAD_URL.rstrip("/")}/api/v1/tickets'
     data = {
-        "title": f'SSH Login on {ZAMMAD_TICKET_HOSTNAME}',
+        "title": f'SSH-Alert on {ZAMMAD_TICKET_HOSTNAME}',
         "group": ZAMMAD_GROUP,
         "customer": ZAMMAD_CUSTOMER,
         "article": {
-            "subject": f'SSH Login on {ZAMMAD_TICKET_HOSTNAME}',
+            "subject": f'SSH-Alert on {ZAMMAD_TICKET_HOSTNAME}',
             "body": f'SSH Login on {ZAMMAD_TICKET_HOSTNAME} for user {user} from {ip}',
             "type": "web",
         }
