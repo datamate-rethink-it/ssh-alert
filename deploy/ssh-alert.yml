@@ -1,6 +1,7 @@
 services:
   ssh-alert:
     image: datamate/ssh-alert:latest
+    container_name: ssh-alert
     restart: unless-stopped
     environment:
       - ALLOWED_IPS=${ALLOWED_IPS:?Variable is not set or empty}
