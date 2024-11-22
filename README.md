@@ -7,7 +7,7 @@ This Docker container monitors `/var/log/auth.log` for suspicious logins and cre
 Debian 12 does not write sshd logs to `/var/log/auth.log` by default:
 
 1. Install `rsyslog`: `apt install rsyslog`.
-1. Update `/etc/sshd/sshd_config`:
+1. Update `/etc/ssh/sshd_config`:
 
     ```
     SyslogFacility AUTH
