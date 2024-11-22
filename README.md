@@ -29,6 +29,9 @@ ZAMMAD_TOKEN=''
 
 # This is used inside the created tickets to identify the machine
 ZAMMAD_TICKET_HOSTNAME='hostname'
+
+# Group in Zammad (default: "Support")
+ZAMMAD_GROUP='Support'
 ```
 
 ## How to test and develop

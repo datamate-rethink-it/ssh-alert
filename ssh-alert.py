@@ -14,6 +14,7 @@ ZAMMAD_URL = os.environ.get('ZAMMAD_URL')
 ZAMMAD_TOKEN = os.environ.get('ZAMMAD_TOKEN')
 ZAMMAD_CUSTOMER = 'cdb@seatable.io'
 ZAMMAD_TICKET_HOSTNAME = os.environ.get('ZAMMAD_TICKET_HOSTNAME')
+ZAMMAD_GROUP = os.environ.get('ZAMMAD_GROUP', 'Support')
 
 # Mapping from IP address to UNIX timestamps
 LAST_TICKET_BY_IP: dict[str, float] = {}
@@ -63,7 +64,7 @@ def create_ticket(user: str, ip: str) -> None:
     url = f'{ZAMMAD_URL.rstrip("/")}/api/v1/tickets'
     data = {
         "title": f'SSH Login on {ZAMMAD_TICKET_HOSTNAME}',
-        "group": "Support",
+        "group": ZAMMAD_GROUP,
         "customer": ZAMMAD_CUSTOMER,
         "article": {
             "subject": f'SSH Login on {ZAMMAD_TICKET_HOSTNAME}',

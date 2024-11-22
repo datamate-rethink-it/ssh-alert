@@ -8,5 +8,6 @@ services:
       - ZAMMAD_URL=${ZAMMAD_URL:?Variable is not set or empty}
       - ZAMMAD_TOKEN=${ZAMMAD_TOKEN:?Variable is not set or empty}
       - ZAMMAD_TICKET_HOSTNAME=${ZAMMAD_TICKET_HOSTNAME:?Variable is not set or empty}
+      - ZAMMAD_GROUP=${ZAMMAD_GROUP:-Support}
     volumes:
       - /var/log/auth.log:/var/log/auth.log:ro
