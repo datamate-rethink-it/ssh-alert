@@ -5,7 +5,6 @@ import socket
 import subprocess
 import sys
 import time
-
 import requests
 
 logging.basicConfig(format='[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', stream=sys.stdout, level=logging.INFO)
@@ -120,5 +119,9 @@ def create_ticket(user: str, ip: str) -> None:
     logger.info('Zammad ticket created')
 
 if __name__ == '__main__':
-    logger.info('Starting ssh-alert')
+    logger.info('Starting ssh-alert:')
+    logger.info('- Hostname:    %s', HOSTNAME)
+    logger.info('- Allowed IPs: %s', ALLOWED_IPS)
+    logger.info('- Use ZAMMAD:  %s', ZAMMAD_ENABLE)
+    logger.info('- Use NTFY:    %s', NTFY_ENABLE)
     main(ALLOWED_IPS)

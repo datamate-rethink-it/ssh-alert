@@ -2,7 +2,9 @@ services:
   ssh-alert:
     build: .
     restart: unless-stopped
+    hostname: local-test
     environment:
+      - TZ=${TIME_ZONE:-Europe/Berlin}
       - ALLOWED_IPS=${ALLOWED_IPS:-}
       - ZAMMAD_ENABLE=${ZAMMAD_ENABLE:-false}
       - ZAMMAD_URL=${ZAMMAD_URL:-}
