@@ -79,6 +79,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:commit-${{ steps.get_commit.outputs.short_sha }}
             ${{ env.IMAGE_NAME }}:${{ needs.init-vars.outputs.image_tag_prefix }}${{ needs.init-vars.outputs.version }}
+            ${{ env.IMAGE_NAME }}:latest
           labels: |
             org.opencontainers.image.title=${{ env.IMAGE_NAME }}
             org.opencontainers.image.version=${{ needs.init-vars.outputs.image_tag_prefix }}${{ needs.init-vars.outputs.version }}

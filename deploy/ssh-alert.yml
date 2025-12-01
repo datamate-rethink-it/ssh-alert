@@ -3,15 +3,16 @@ services:
     image: datamate/ssh-alert:latest
     container_name: ssh-alert
     restart: unless-stopped
+    hostname: whatever-hostname-you-want
     environment:
-      - ALLOWED_IPS=${ALLOWED_IPS}
+      - ALLOWED_IPS=${ALLOWED_IPS:-}
       - ZAMMAD_ENABLE=${ZAMMAD_ENABLE:-false}
-      - ZAMMAD_URL=${ZAMMAD_URL}
-      - ZAMMAD_TOKEN=${ZAMMAD_TOKEN}
+      - ZAMMAD_URL=${ZAMMAD_URL:-}
+      - ZAMMAD_TOKEN=${ZAMMAD_TOKEN:-}
       - ZAMMAD_GROUP=${ZAMMAD_GROUP:-Support}
       - NTFY_ENABLE=${NTFY_ENABLE:-false}
-      - NTFY_URL=${$NTFY_URL}
+      - NTFY_URL=${NTFY_URL:-}
       - NTFY_TOPIC=${NTFY_TOPIC:-ssh-alert}
-      - NTFY_TOKEN=${NTFY_TOKEN}
+      - NTFY_TOKEN=${NTFY_TOKEN:-}
     volumes:
       - /var/log/auth.log:/var/log/auth.log:ro
