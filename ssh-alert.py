@@ -1,28 +1,50 @@
 import logging
 import os
 import re
+import socket
 import subprocess
 import sys
 import time
 
 import requests
 
+logging.basicConfig(format='[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger()
+
 FILENAME = '/var/log/auth.log'
 REGEX_PATTERN = re.compile(r"Accepted (publickey|password) for (?P<user>[^\s]+) from (?P<ip>[^\s]+)")
-ALLOWED_IPS = os.environ.get('ALLOWED_IPS', [])
+
+# Environment variables
 ZAMMAD_URL = os.environ.get('ZAMMAD_URL')
 ZAMMAD_TOKEN = os.environ.get('ZAMMAD_TOKEN')
 ZAMMAD_CUSTOMER = 'cdb@seatable.io'
-ZAMMAD_TICKET_HOSTNAME = os.environ.get('ZAMMAD_TICKET_HOSTNAME')
 ZAMMAD_GROUP = os.environ.get('ZAMMAD_GROUP', 'Support')
+ZAMMAD_ENABLE = os.environ.get('ZAMMAD_ENABLE', 'false').lower() == 'true'
+
+NTFY_URL = os.environ.get('NTFY_URL')
+NTFY_TOPIC = os.environ.get('NTFY_TOPIC', 'ssh-alert')
+NTFY_TOKEN = os.environ.get('NTFY_TOKEN')
+NTFY_ENABLE = os.environ.get('NTFY_ENABLE', 'false').lower() == 'true'
+
+ALLOWED_IPS = [ip.strip() for ip in os.environ.get('ALLOWED_IPS', '').split(',') if ip.strip()]
+HOSTNAME = socket.gethostname().strip()
+
+# Input validation
+if ZAMMAD_ENABLE:
+    if not all([ZAMMAD_URL, ZAMMAD_TOKEN, ZAMMAD_GROUP, ZAMMAD_CUSTOMER]):
+        logger.critical('ZAMMAD_ENABLE=true but configuration is missing')
+        sys.exit(1)
+
+if NTFY_ENABLE:
+    if not all([NTFY_URL, NTFY_TOPIC, NTFY_TOKEN]):
+        logger.critical('NTFY_ENABLE=true but NTFY_URL is missing')
+        sys.exit(1)
+
 
 # Mapping from IP address to UNIX timestamps
 LAST_TICKET_BY_IP: dict[str, float] = {}
 # Only allow a single ticket per IP address to be created in this interval
 TICKET_INTERVAL_IN_SECONDS = 60
-
-logging.basicConfig(format='[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S', stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger()
 
 def main(allowed_ips: list[str]):
     f = subprocess.Popen(['tail', '-F', '-n0', FILENAME], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -52,23 +74,39 @@ def main(allowed_ips: list[str]):
             continue
 
         try:
-            create_ticket(user, ip)
-            logger.info('Successfully created ticket')
+            if ZAMMAD_ENABLE:
+                create_ticket(user, ip)
+                
+            if NTFY_ENABLE:
+                create_ntfy_notification(user, ip)
+
             LAST_TICKET_BY_IP[ip] = time.time()
-        except requests.exceptions.HTTPError as error:
-            logger.error('Could not create ticket: %s', error.response.json())
         except Exception as error:
-            logger.error('Could not create ticket: %s', error)
+            logger.error('Notification failed: %s', error)
+
+def create_ntfy_notification(user: str, ip: str) -> None:
+    url = f'{NTFY_URL.rstrip("/")}/{NTFY_TOPIC}'
+    message = f'SSH Login on `{HOSTNAME}` for user `{user}` from {ip}'
+
+    headers = {
+        'prio': 'high',
+        'tags': 'warning',
+        'Authorization': f'Bearer {NTFY_TOKEN}'
+    }
+    
+    response = requests.post(url, data=message.encode('utf-8'), headers=headers)
+    response.raise_for_status()
+    logger.info('ntfy notification sent to %s', NTFY_TOPIC)
 
 def create_ticket(user: str, ip: str) -> None:
     url = f'{ZAMMAD_URL.rstrip("/")}/api/v1/tickets'
     data = {
-        "title": f'SSH-Alert on {ZAMMAD_TICKET_HOSTNAME}',
+        "title": f'SSH-Alert on {HOSTNAME}',
         "group": ZAMMAD_GROUP,
         "customer": ZAMMAD_CUSTOMER,
         "article": {
-            "subject": f'SSH-Alert on {ZAMMAD_TICKET_HOSTNAME}',
-            "body": f'SSH Login on {ZAMMAD_TICKET_HOSTNAME} for user {user} from {ip}',
+            "subject": f'SSH-Alert on {HOSTNAME}',
+            "body": f'SSH Login on {HOSTNAME} for user {user} from {ip}',
             "type": "web",
         }
     }
@@ -79,23 +117,8 @@ def create_ticket(user: str, ip: str) -> None:
 
     response = requests.post(url, json=data, headers=headers)
     response.raise_for_status()
+    logger.info('Zammad ticket created')
 
 if __name__ == '__main__':
     logger.info('Starting ssh-alert')
-
-    allowed_ips = os.environ.get('ALLOWED_IPS', '').split(',')
-    logger.info('Allowed IPs: %s', allowed_ips)
-
-    if not ZAMMAD_URL:
-        logger.critical('ZAMMAD_URL must be provided')
-        sys.exit(1)
-
-    if not ZAMMAD_TOKEN:
-        logger.critical('ZAMMAD_TOKEN must be provided')
-        sys.exit(1)
-
-    if not ZAMMAD_TICKET_HOSTNAME:
-        logger.critical('ZAMMAD_TICKET_HOSTNAME must be provided')
-        sys.exit(1)
-
-    main(allowed_ips)
+    main(ALLOWED_IPS)

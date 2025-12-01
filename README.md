@@ -1,10 +1,10 @@
 # ssh-alert
 
-This Docker container monitors `/var/log/auth.log` for suspicious logins and creates Zammad tickets if a successful login was detected.
+This Docker container monitors `/var/log/auth.log` for suspicious logins and can create either a Zammad ticket or send a NTFY notification if a successful login was detected.
 
 ## Prerequisites
 
-Debian 12 does not write sshd logs to `/var/log/auth.log` by default:
+Debian 12/13 does not write sshd logs to `/var/log/auth.log` by default:
 
 1. Install `rsyslog`: `apt install rsyslog`.
 1. Update `/etc/ssh/sshd_config`:
@@ -22,16 +22,20 @@ Debian 12 does not write sshd logs to `/var/log/auth.log` by default:
 # Ranges or wildcards are currently not supported
 ALLOWED_IPS='1.2.3.4,2.3.4.5'
 
+ZAMMAD_ENABLE='true'
+
 ZAMMAD_URL='https://your-zammad-instance.com'
 
 # Token with 'ticket.agent' scope
 ZAMMAD_TOKEN=''
 
-# This is used inside the created tickets to identify the machine
-ZAMMAD_TICKET_HOSTNAME='hostname'
-
 # Group in Zammad (default: "Support")
 ZAMMAD_GROUP='Support'
+
+NTFY_ENABLE='true'
+NTFY_URL='https://your-ntfy-server.com'
+NTFY_TOPIC=''
+NTFY_TOKEN='Bearer auth token...'
 ```
 
 ## How to test and develop
