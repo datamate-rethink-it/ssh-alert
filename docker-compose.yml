@@ -15,4 +15,4 @@ services:
       - NTFY_TOPIC=${NTFY_TOPIC:-ssh-alert}
       - NTFY_TOKEN=${NTFY_TOKEN:-}
     volumes:
-      - /var/log/auth.log:/var/log/auth.log:ro
+      - /var/log:/var/log:ro

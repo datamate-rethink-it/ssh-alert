@@ -57,3 +57,9 @@ docker compose logs -f
 ## Deployment
 
 -> [`deploy/ssh-alert.yml`](./deploy/ssh-alert.yml)
+
+## Logrotate Mount Issue
+
+When mounting `/var/log/auth.log` as a single read-only bind mount, the container shows outdated entries while the host has current logs. This occurs due to host-side log rotation by logrotate, which renames the file (e.g., to auth.log.1) and creates a new empty one, breaking the inode-based bind mount sync.
+
+Therefore you should always mount the complete directory `/var/log`.
